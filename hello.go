@@ -1,24 +1,19 @@
 package main
 
 import (
-  "io/ioutil"
-  "fmt"
-  "net/http"
+  "github.com/PuerkitoBio/goquery"
 )
   
 
 func main() {
   p := "https://golang.org"
-  re, er := http.Get(p)
-  if er != nil {
-    panic(er)
-  }
-  defer re.Body.Close()
-
-  s, er := ioutil.ReadAll(re.Body)
+  doc, er := goquery.NewDocument(p)
   if er != nil {
     panic(er)
   }
 
-  fmt.Println(string(s))
+  doc.Find("a").Each(func(n int, sel *goquery.Selection){
+    lk, _ := sel.Attr("href")
+    println(n, sel.Text(), "(", lk, ")")
+  })
 }
