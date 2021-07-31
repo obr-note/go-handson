@@ -1,6 +1,7 @@
 package main
 
 import (
+  "hello"
   "strconv"
   "fmt"
   "database/sql"
@@ -18,6 +19,8 @@ func (m *Mydata) Str() string {
   return "<\"" + strconv.Itoa(m.ID) + ":" + m.Name + "\" " + ", " + m.Mail + "," + strconv.Itoa(m.Age) + ">"
 }
 
+var qry string = "select * from mydata where id = ?"
+
 func main() {
   con, er := sql.Open("sqlite3", "data.sqlite3")
   if er != nil {
@@ -25,18 +28,27 @@ func main() {
   }
   defer con.Close()
 
-  q := "select * from mydata"
-  rs, er := con.Query(q)
-  if er != nil {
-    panic(er)
-  }
-
-  for rs.Next() {
-    var md Mydata
-    er := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
+  for true {
+    s := hello.Input("id")
+    if s == "" {
+      break
+    }
+    n, er := strconv.Atoi(s)
     if er != nil {
       panic(er)
     }
-    fmt.Println(md.Str())
+    rs, er := con.Query(qry, n)
+    if er != nil {
+      panic(er)
+    }
+    for rs.Next() {
+      var md Mydata
+      er := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
+      if er != nil {
+        panic(er)
+      }
+      fmt.Println(md.Str())
+    }
   }
+  fmt.Println("***end***")
 }
