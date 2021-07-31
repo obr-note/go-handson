@@ -33,25 +33,12 @@ func main() {
   qry = "select * from mydata where id = ?"
   rw := con.QueryRow(qry, id)
   tgt := mydatafmRw(rw)
-  ae := strconv.Itoa(tgt.Age)
-  nm := hello.Input("name(" + tgt.Name + ")")
-  ml := hello.Input("mail(" + tgt.Mail + ")")
-  ge := hello.Input("age(" + ae + ")")
-  ag, _ := strconv.Atoi(ge)
-
-  if nm == "" {
-    nm = tgt.Name
+  fmt.Println(tgt.Str())
+  f := hello.Input("delete it? (y/n)")
+  if f == "y" {
+    qry = "delete from mydata where id=?"
+    con.Exec(qry, id)
   }
-  if ml == "" {
-    ml = tgt.Mail
-  }
-  if ge == "" {
-    ag = tgt.Age
-  }
-
-  qry = "update mydata set name=?,mail=?,age=? where id=?"
-  con.Exec(qry, nm, ml, ag, id)
-
   showRecord(con)
 }
 
