@@ -28,13 +28,30 @@ func main() {
   }
   defer con.Close()
 
-  nm := hello.Input("name")
-  ml := hello.Input("mail")
-  age := hello.Input("age")
-  ag, _ := strconv.Atoi(age)
+  ids := hello.Input("update ID")
+  id, _ := strconv.Atoi(ids)
+  qry = "select * from mydata where id = ?"
+  rw := con.QueryRow(qry, id)
+  tgt := mydatafmRw(rw)
+  ae := strconv.Itoa(tgt.Age)
+  nm := hello.Input("name(" + tgt.Name + ")")
+  ml := hello.Input("mail(" + tgt.Mail + ")")
+  ge := hello.Input("age(" + ae + ")")
+  ag, _ := strconv.Atoi(ge)
 
-  qry := "insert into mydata (name, mail, age) values (?,?,?)"
-  con.Exec(qry, nm, ml, ag)
+  if nm == "" {
+    nm = tgt.Name
+  }
+  if ml == "" {
+    ml = tgt.Mail
+  }
+  if ge == "" {
+    ag = tgt.Age
+  }
+
+  qry = "update mydata set name=?,mail=?,age=? where id=?"
+  con.Exec(qry, nm, ml, ag, id)
+
   showRecord(con)
 }
 
@@ -47,6 +64,15 @@ func showRecord(con *sql.DB) {
 }
 
 func mydatafmRws(rs *sql.Rows) *Mydata {
+  var md Mydata
+  er := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
+  if er != nil {
+    panic(er)
+  }
+  return &md
+}
+
+func mydatafmRw(rs *sql.Row) *Mydata {
   var md Mydata
   er := rs.Scan(&md.ID, &md.Name, &md.Mail, &md.Age)
   if er != nil {
